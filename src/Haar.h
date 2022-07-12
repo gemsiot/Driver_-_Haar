@@ -10,6 +10,7 @@ class Haar: public Sensor
 	constexpr static int DEAFULT_PORT = 2; ///<Use port 2 by default
 	constexpr static int DEFAULT_SENSOR_PORT = 0; ///<Use port 0 by default
   	constexpr static int DEFAULT_VERSION = 0x21; ///<Use hardware version v2.1 by default
+	const String FIRMWARE_VERSION = "0.0.0"; //FIX! Read from system??
   	// constexpr static int MAX_NUM_ERRORS = 10; ///<Maximum number of errors to log before overwriting previous errors in buffer
 
 	// const uint32_t SENSOR_PORT_RANGE_ERROR = 0x90010100; //FIX! 
@@ -24,6 +25,7 @@ class Haar: public Sensor
 		Haar(uint8_t talonPort_ = DEAFULT_PORT, uint8_t sensorPort_ = DEFAULT_SENSOR_PORT, uint8_t version = DEFAULT_VERSION);
 		String begin(time_t time, bool &criticalFault, bool &fault);
 		String getData(time_t time);
+		String getMetadata();
 		String getErrors();
 		bool isPresent();
 		// uint8_t getTalonPort() {

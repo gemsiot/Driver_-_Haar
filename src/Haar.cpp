@@ -43,6 +43,37 @@ String Haar::begin(time_t time, bool &criticalFault, bool &fault)
 	return "{}"; //DEBUG!
 }
 
+String Haar::getMetadata()
+{
+	// Wire.beginTransmission(0x58); //Write to UUID range of EEPROM
+	// Wire.write(0x98); //Point to start of UUID
+	// int error = Wire.endTransmission();
+	// // uint64_t uuid = 0;
+	// String uuid = "";
+
+	// if(error != 0) throwError(EEPROM_I2C_ERROR | error);
+	// else {
+	// 	uint8_t val = 0;
+	// 	Wire.requestFrom(0x58, 8); //EEPROM address
+	// 	for(int i = 0; i < 8; i++) {
+	// 		val = Wire.read();//FIX! Wait for result??
+	// 		// uuid = uuid | (val << (8 - i)); //Concatonate into full UUID
+	// 		uuid = uuid + String(val, HEX); //Print out each hex byte
+	// 		// Serial.print(Val, HEX); //Print each hex byte from left to right
+	// 		// if(i < 7) Serial.print('-'); //Print formatting chracter, don't print on last pass
+	// 		if(i < 7) uuid = uuid + "-"; //Print formatting chracter, don't print on last pass
+	// 	}
+	// }
+
+	String metadata = "{\"HAAR\":{";
+	// if(error == 0) metadata = metadata + "\"SN\":\"" + uuid + "\","; //Append UUID only if read correctly, skip otherwise 
+	metadata = metadata + "\"Hardware\":\"v" + String(version >> 4, HEX) + "." + String(version & 0x0F, HEX) + "\","; //Report version as modded BCD
+	metadata = metadata + "\"Firmware\":\"" + FIRMWARE_VERSION + "\","; //Static firmware version 
+	metadata = metadata + "\"Pos\":[" + getTalonPortString() + "," + getSensorPortString() + "]"; //Concatonate position 
+	metadata = metadata + "}}"; //CLOSE  
+	return metadata; 
+}
+
 String Haar::getData(time_t time)
 {
 	float temperatureDPS368;
