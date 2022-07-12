@@ -4,3 +4,6 @@
 [submodule "src/DPS368-Library-Arduino"]
 	path = src/DPS368-Library-Arduino
 	url = https://github.com/gemsiot/DPS368-Library-Arduino.git
+[submodule "src/Adafruit_BusIO"]
+	path = src/Adafruit_BusIO
+	url = https://github.com/gemsiot/Adafruit_BusIO.git
