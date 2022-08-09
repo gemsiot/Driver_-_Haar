@@ -3,9 +3,9 @@
 
 #include "DPS368-Library-Arduino/src/Dps368.h"
 #include "Adafruit_SHT31/src/Adafruit_SHT31.h"
-#include <Sensor.h>
+#include <I2CTalonSensor.h>
 
-class Haar: public Sensor
+class Haar: public I2CTalonSensor
 {
 	constexpr static int DEAFULT_PORT = 2; ///<Use port 2 by default
 	constexpr static int DEFAULT_SENSOR_PORT = 0; ///<Use port 0 by default
@@ -22,12 +22,12 @@ class Haar: public Sensor
 	const uint32_t SHT3X_I2C_ERROR = 0x10020000; //FIX! Error subtype = I2C error code
 
 	public:
-		Haar(uint8_t talonPort_ = DEAFULT_PORT, uint8_t sensorPort_ = DEFAULT_SENSOR_PORT, uint8_t version = DEFAULT_VERSION);
+		Haar(I2CTalon& talon, uint8_t sensorPort_);
 		String begin(time_t time, bool &criticalFault, bool &fault);
 		String getData(time_t time);
 		String getMetadata();
 		String getErrors();
-		bool isPresent();
+		static bool isPresent(I2CTalon& talon, uint8_t sensorPort);
 		// uint8_t getTalonPort() {
 		// 	if(talonPort < 255) return talonPort + 1;
 		// 	else return 0;

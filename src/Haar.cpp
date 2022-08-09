@@ -1,10 +1,8 @@
 #include <Haar.h>
 
-Haar::Haar(uint8_t talonPort_, uint8_t sensorPort_, uint8_t version): presSensor(), rhSensor()
+Haar::Haar(I2CTalon& talon, uint8_t sensorPort_): I2CTalonSensor(talon), presSensor(), rhSensor()
 {
 	//Only update values if they are in range, otherwise stick with default values
-	if(talonPort_ > 0) talonPort = talonPort_ - 1;
-	else talonPort = 255; //Reset to null default if not in range
 	if(sensorPort_ > 0) sensorPort = sensorPort_ - 1;
 	else sensorPort = 255; //Reset to null default if not in range 
 	sensorInterface = BusType::I2C; 
@@ -165,7 +163,7 @@ String Haar::getData(time_t time)
 	return output;
 }
 
-bool Haar::isPresent() 
+bool Haar::isPresent(I2CTalon& talon, uint8_t sensorPort)
 { //FIX!
 	Wire.beginTransmission(0x77);
 	int errorA = Wire.endTransmission();
