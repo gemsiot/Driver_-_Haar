@@ -65,12 +65,12 @@ String Haar::getMetadata()
 	// 	}
 	// }
 
-	String metadata = "{\"HAAR\":{";
+	String metadata = "\"HAAR\":{";
 	// if(error == 0) metadata = metadata + "\"SN\":\"" + uuid + "\","; //Append UUID only if read correctly, skip otherwise 
 	metadata = metadata + "\"Hardware\":\"v" + String(version >> 4, HEX) + "." + String(version & 0x0F, HEX) + "\","; //Report version as modded BCD
 	metadata = metadata + "\"Firmware\":\"" + FIRMWARE_VERSION + "\","; //Static firmware version 
 	metadata = metadata + "\"Pos\":[" + getTalonPortString() + "," + getSensorPortString() + "]"; //Concatonate position 
-	metadata = metadata + "}}"; //CLOSE  
+	metadata = metadata + "}"; //CLOSE  
 	return metadata; 
 }
 
@@ -81,7 +81,7 @@ String Haar::getData(time_t time)
 	uint8_t oversampling = 7;
 	int16_t ret;
 	
-	String output = "{\"HAAR\":{"; //OPEN JSON BLOB
+	String output = "\"HAAR\":{"; //OPEN JSON BLOB
 	String dps368Data = "\"DPS368\":{\"Temperature\":"; //Open dps368 substring
 	String sht3xData = "\"SHT31\":{\"Temperature\":"; //Open SHT31 substring //FIX! How to deal with SHT31 vs SHT35?? Do we deal with it at all
 
@@ -160,7 +160,7 @@ String Haar::getData(time_t time)
 	
 	output = output + dps368Data + "," + sht3xData + ",";
 	output = output + "\"Pos\":[" + getTalonPortString() + "," + getSensorPortString() + "]"; //Concatonate position 
-	output = output + "}}"; //CLOSE JSON BLOB
+	output = output + "}"; //CLOSE JSON BLOB
 	Serial.println(output); //DEBUG!
 	return output;
 }
@@ -232,7 +232,7 @@ String Haar::getErrors()
 	// 	}
 	// 	return 0; //Return success indication
 	// }
-	String output = "{\"HAAR\":{"; // OPEN JSON BLOB
+	String output = "\"HAAR\":{"; // OPEN JSON BLOB
 	output = output + "\"CODES\":["; //Open codes pair
 
 	for(int i = 0; i < min(MAX_NUM_ERRORS, numErrors); i++) { //Interate over used element of array without exceeding bounds
@@ -248,7 +248,7 @@ String Haar::getErrors()
 	else output = output + "0,"; //Otherwise set it as clear
 	output = output + "\"NUM\":" + String(numErrors) + ","; //Append number of errors
 	output = output + "\"Pos\":[" + getTalonPortString() + "," + getSensorPortString() + "]"; //Concatonate position 
-	output = output + "}}"; //CLOSE JSON BLOB
+	output = output + "}"; //CLOSE JSON BLOB
 	numErrors = 0; //Clear error count
 	return output;
 
