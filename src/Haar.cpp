@@ -96,58 +96,66 @@ String Haar::getData(time_t time)
 	// int errorA = Wire.endTransmission();
 	// Wire.beginTransmission(0x76);
 	// int errorB = Wire.endTransmission();
-	bool dummy1;
-	bool dummy2;
-	begin(0, dummy1, dummy2); //DEBUG!
-	ret = presSensor.measureTempOnce(temperatureDPS368, oversampling); //Measure temp
-	if(ret == 0) { //If no error in read
-		dps368Data = dps368Data + String(temperatureDPS368,2) + ","; //Append temp with 2 decimal points since resolution is 0.01°C, add comma
-		// dps368Data = dps368Data + "Pressure" + String()
-	}
-	else {
-		dps368Data = dps368Data + "null,"; //Append null as non-report 
-		throwError(DPS368_READ_ERROR | 0x1000 | talonPortErrorCode | sensorPortErrorCode); //Error subtype = temp
-		//FIX! Throw error
-	}
-	ret = presSensor.measurePressureOnce(pressure, oversampling); //Measure pressure 
-	if(ret == 0) { //If no error in read
-		dps368Data = dps368Data + "\"Pressure\":" + String(pressure/100.0,3); //Append pressure (divided from Pa to hPa, which is equal to mBar) with 3 decimal points since resolution is 0.002hPa
-	}
-	else {
-		dps368Data = dps368Data + "\"Pressure\":null"; //Append null as non-report
-		throwError(DPS368_READ_ERROR | 0x2000 | talonPortErrorCode | sensorPortErrorCode); //Error subtype = pres
-		//FIX! Throw error
-	}
-	dps368Data = dps368Data + "}"; //Close DPS368 substring
+	if(getSensorPort() != 0) { //If sensor detected
+		bool dummy1;
+		bool dummy2;
+		begin(0, dummy1, dummy2); //DEBUG!
+		ret = presSensor.measureTempOnce(temperatureDPS368, oversampling); //Measure temp
+		if(ret == 0) { //If no error in read
+			dps368Data = dps368Data + String(temperatureDPS368,2) + ","; //Append temp with 2 decimal points since resolution is 0.01°C, add comma
+			// dps368Data = dps368Data + "Pressure" + String()
+		}
+		else {
+			dps368Data = dps368Data + "null,"; //Append null as non-report 
+			throwError(DPS368_READ_ERROR | 0x1000 | talonPortErrorCode | sensorPortErrorCode); //Error subtype = temp
+			//FIX! Throw error
+		}
+		ret = presSensor.measurePressureOnce(pressure, oversampling); //Measure pressure 
+		if(ret == 0) { //If no error in read
+			dps368Data = dps368Data + "\"Pressure\":" + String(pressure/100.0,3); //Append pressure (divided from Pa to hPa, which is equal to mBar) with 3 decimal points since resolution is 0.002hPa
+		}
+		else {
+			dps368Data = dps368Data + "\"Pressure\":null"; //Append null as non-report
+			throwError(DPS368_READ_ERROR | 0x2000 | talonPortErrorCode | sensorPortErrorCode); //Error subtype = pres
+			//FIX! Throw error
+		}
+		dps368Data = dps368Data + "}"; //Close DPS368 substring
 
-	float temperatureSHT3x = rhSensor.readTemperature();
-  	float humidity = rhSensor.readHumidity();
+		float temperatureSHT3x = rhSensor.readTemperature();
+		float humidity = rhSensor.readHumidity();
 
-	if(!isnan(temperatureSHT3x)) { //If no error in read
-		sht3xData = sht3xData + String(temperatureSHT3x,2) + ","; //Append temp with 2 decimal points since resolution is 0.01°C, add comma
-		// dps368Data = dps368Data + "Pressure" + String()
+		if(!isnan(temperatureSHT3x)) { //If no error in read
+			sht3xData = sht3xData + String(temperatureSHT3x,2) + ","; //Append temp with 2 decimal points since resolution is 0.01°C, add comma
+			// dps368Data = dps368Data + "Pressure" + String()
+		}
+		else {
+			sht3xData = sht3xData + "null,"; //Append null as non-report 
+			Wire.beginTransmission(0x76);
+			int error = Wire.endTransmission();
+			if(error == 0) throwError(SHT3X_NAN_ERROR | 0x1000 | talonPortErrorCode | sensorPortErrorCode); //Error subtype = temp
+			else throwError(SHT3X_I2C_ERROR | (error << 12) | talonPortErrorCode | sensorPortErrorCode); //Error subtype = I2C error
+			
+			//FIX! Throw error
+		}
+
+		if(!isnan(humidity)) { //If no error in read
+			sht3xData = sht3xData + "\"Humidity\":" + String(humidity,2); //Append humidity with 2 decimal points since resolution is 0.01%
+		}
+		else {
+			sht3xData = sht3xData + "\"Humidity\":null"; //Append null as non-report
+			Wire.beginTransmission(0x76);
+			int error = Wire.endTransmission();
+			if(error == 0) throwError(SHT3X_NAN_ERROR | 0x2000 | talonPortErrorCode | sensorPortErrorCode); //Error subtype = RH
+			else throwError(SHT3X_I2C_ERROR | (error << 12) | talonPortErrorCode | sensorPortErrorCode); //Error subtype = I2C error
+		}
+		sht3xData = sht3xData + "}"; //Close SHT3x substring
 	}
 	else {
-		sht3xData = sht3xData + "null,"; //Append null as non-report 
-		Wire.beginTransmission(0x76);
-		int error = Wire.endTransmission();
-		if(error == 0) throwError(SHT3X_NAN_ERROR | 0x1000 | talonPortErrorCode | sensorPortErrorCode); //Error subtype = temp
-		else throwError(SHT3X_I2C_ERROR | (error << 12) | talonPortErrorCode | sensorPortErrorCode); //Error subtype = I2C error
-		
-		//FIX! Throw error
+		throwError(FIND_FAIL); //Report failure to find
+		dps368Data = dps368Data + "null,\"Pressure\":null}"; //Fill out null string
+		sht3xData = sht3xData + "null,\"Pressure\":null}"; //Fill out null string
 	}
-
-	if(!isnan(humidity)) { //If no error in read
-		sht3xData = sht3xData + "\"Humidity\":" + String(humidity,2); //Append humidity with 2 decimal points since resolution is 0.01%
-	}
-	else {
-		sht3xData = sht3xData + "\"Humidity\":null"; //Append null as non-report
-		Wire.beginTransmission(0x76);
-		int error = Wire.endTransmission();
-		if(error == 0) throwError(SHT3X_NAN_ERROR | 0x2000 | talonPortErrorCode | sensorPortErrorCode); //Error subtype = RH
-		else throwError(SHT3X_I2C_ERROR | (error << 12) | talonPortErrorCode | sensorPortErrorCode); //Error subtype = I2C error
-	}
-	sht3xData = sht3xData + "}"; //Close SHT3x substring
+	
 
 	// Serial.print("TEMP: ");
 	// if(errorA == 0 || errorB == 0) Serial.println(temperature); 
