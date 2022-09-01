@@ -40,7 +40,7 @@ String Haar::begin(time_t time, bool &criticalFault, bool &fault)
 	// 	if(errorB != 0) Serial.print("B\t");
 	// 	Serial.println("");
 	// }
-	return "{}"; //DEBUG!
+	return ""; //DEBUG!
 }
 
 String Haar::getMetadata()
