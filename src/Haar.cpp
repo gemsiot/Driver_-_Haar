@@ -12,19 +12,35 @@ Haar::Haar(uint8_t talonPort_, uint8_t sensorPort_, uint8_t version): presSensor
 
 String Haar::begin(time_t time, bool &criticalFault, bool &fault)
 {
-	Serial.println("HAAR - BEGIN"); //DEBUG!
-	presSensor.begin(Wire, 0x76); //DEBUG!
-	if(rhSensor.begin(0x44) == false) {
-		Serial.println("\tSHT31 Init Fail"); //DEBUG!
-		throwError(SHT3X_INIT_ERROR | talonPortErrorCode); //Error subtype = I2C error
+	// Serial.println("HAAR - BEGIN"); //DEBUG!
+	Wire.beginTransmission(ADR_DPS368);
+	int errorBase = Wire.endTransmission();
+
+	Wire.beginTransmission(ADR_DPS368_ALT);
+	int errorAlt = Wire.endTransmission();
+
+	if(errorBase == 0) {
+		presSensor.begin(Wire, ADR_DPS368); //If address found at base address, use base addresses to initialize
+		adrDPS368 = ADR_DPS368; //Update address
+	}
+	else if(errorAlt == 0) {
+		presSensor.begin(Wire, ADR_DPS368_ALT); //If alt address passes, then use alt address to init
+		adrDPS368 = ADR_DPS368; //Update address
+	}
+	else throwError(DPS368_INIT_ERROR | talonPortErrorCode); //If neither are found, throw error
+	
+	if(rhSensor.begin(ADR_SHT31) == false) {
+		int initAttempt = rhSensor.begin(ADR_SHT31_ALT); //Try again with alt address
+		// Serial.println("\tSHT31 Init Fail"); //DEBUG!
+		if(initAttempt == false) throwError(SHT3X_INIT_ERROR | talonPortErrorCode); //If both the base address and alt address fail to init, then throw error
 	} 
 	
-	Wire.beginTransmission(0x76);
-	int error = Wire.endTransmission();
-	if(error != 0) {
-		Serial.println("\tDPS368 Init Fail"); //DEBUG!
-		throwError(DPS368_INIT_ERROR | (error << 12) | talonPortErrorCode); //Error subtype = I2C error
-	}
+	// Wire.beginTransmission(0x76);
+	// int error = Wire.endTransmission();
+	// if(error != 0) {
+	// 	// Serial.println("\tDPS368 Init Fail"); //DEBUG!
+	// 	throwError(DPS368_INIT_ERROR | (error << 12) | talonPortErrorCode); //Error subtype = I2C error
+	// }
 	
 	// Wire.beginTransmission(0x44);
 	// int errorB = Wire.endTransmission();
@@ -130,7 +146,7 @@ String Haar::getData(time_t time)
 		}
 		else {
 			sht3xData = sht3xData + "null,"; //Append null as non-report 
-			Wire.beginTransmission(0x76);
+			Wire.beginTransmission(adrDPS368);
 			int error = Wire.endTransmission();
 			if(error == 0) throwError(SHT3X_NAN_ERROR | 0x1000 | talonPortErrorCode | sensorPortErrorCode); //Error subtype = temp
 			else throwError(SHT3X_I2C_ERROR | (error << 12) | talonPortErrorCode | sensorPortErrorCode); //Error subtype = I2C error
@@ -143,7 +159,7 @@ String Haar::getData(time_t time)
 		}
 		else {
 			sht3xData = sht3xData + "\"Humidity\":null"; //Append null as non-report
-			Wire.beginTransmission(0x76);
+			Wire.beginTransmission(adrDPS368);
 			int error = Wire.endTransmission();
 			if(error == 0) throwError(SHT3X_NAN_ERROR | 0x2000 | talonPortErrorCode | sensorPortErrorCode); //Error subtype = RH
 			else throwError(SHT3X_I2C_ERROR | (error << 12) | talonPortErrorCode | sensorPortErrorCode); //Error subtype = I2C error
@@ -175,9 +191,9 @@ String Haar::getData(time_t time)
 
 bool Haar::isPresent() 
 { //FIX!
-	Wire.beginTransmission(0x77);
+	Wire.beginTransmission(ADR_DPS368_ALT);
 	int errorA = Wire.endTransmission();
-	Wire.beginTransmission(0x76);
+	Wire.beginTransmission(ADR_DPS368);
 	int errorB = Wire.endTransmission();
 	Serial.print("HAAR TEST: "); //DEBUG!
 	Serial.print(errorA);

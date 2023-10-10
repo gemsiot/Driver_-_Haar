@@ -10,7 +10,7 @@ class Haar: public Sensor
 	constexpr static int DEAFULT_PORT = 2; ///<Use port 2 by default
 	constexpr static int DEFAULT_SENSOR_PORT = 0; ///<Use port 0 by default
   	constexpr static int DEFAULT_VERSION = 0x21; ///<Use hardware version v2.1 by default
-	const String FIRMWARE_VERSION = "0.1.1"; //FIX! Read from system??
+	const String FIRMWARE_VERSION = "0.2.0"; //FIX! Read from system??
   	// constexpr static int MAX_NUM_ERRORS = 10; ///<Maximum number of errors to log before overwriting previous errors in buffer
 
 	// const uint32_t SENSOR_PORT_RANGE_ERROR = 0x90010100; //FIX! 
@@ -48,6 +48,11 @@ class Haar: public Sensor
 	private:
 		Dps368 presSensor = Dps368();
 		Adafruit_SHT31 rhSensor = Adafruit_SHT31();
+		const uint8_t ADR_DPS368 = 0x76;
+		const uint8_t ADR_DPS368_ALT = 0x77;
+		const uint8_t ADR_SHT31 = 0x44;
+		const uint8_t ADR_SHT31_ALT = 0x45;
+		uint8_t adrDPS368 = 0x76; //Used to store DPS368 address after dectection
 		// uint8_t port = 0;
 		// int throwError(uint32_t error);
 
