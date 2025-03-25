@@ -1,6 +1,0 @@
-[submodule "src/Adafruit_SHT31"]
-	path = src/Adafruit_SHT31
-	url = https://github.com/gems-labx/Adafruit_SHT31
-[submodule "src/DPS368-Library-Arduino"]
-	path = src/DPS368-Library-Arduino
-	url = https://github.com/gemsiot/DPS368-Library-Arduino.git

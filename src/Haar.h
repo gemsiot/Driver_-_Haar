@@ -3,8 +3,8 @@
 #ifndef Haar_h
 #define Haar_h
 
-#include "DPS368-Library-Arduino/src/Dps368.h"
-#include "Adafruit_SHT31/src/Adafruit_SHT31.h"
+#include "../../DPS368-Library-Arduino/src/Dps368.h"
+#include "../../Adafruit_SHT31/src/Adafruit_SHT31.h"
 #include <Sensor.h>
 
 class Haar: public Sensor
